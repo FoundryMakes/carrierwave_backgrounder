@@ -82,11 +82,19 @@ module CarrierWave
 
             def write_#{column}_identifier
               super and return if process_#{column}_upload
-              self.#{column}_tmp = _mounter(:#{column}).cache_name if _mounter(:#{column}).cache_name
+              cache_name = cache_name_for_column(:#{column})
+              self.#{column}_tmp = cache_name if cache_name
             end
 
             def store_#{column}!
               super if process_#{column}_upload
+            end
+            
+            private
+            
+            def cache_name_for_column(column)
+              return _mounter(column).cache_name if _mounter(column).respond_to?(:cache_name)
+              _mounter(column).cache_names[0] if _mounter(column).respond_to?(:cache_names)
             end
 
           RUBY
