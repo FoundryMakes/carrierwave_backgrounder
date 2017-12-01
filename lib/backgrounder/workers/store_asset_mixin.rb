@@ -15,7 +15,6 @@ module CarrierWave
         record = super(*args)
 
         if record && record.send(:"#{column}_tmp")
-          store_directories(record)
           record.send :"process_#{column}_upload=", true
           record.send :"#{column}_processing=", false if record.respond_to?(:"#{column}_processing")
           record.send(:"#{column}_data_filename=", self.filename)
