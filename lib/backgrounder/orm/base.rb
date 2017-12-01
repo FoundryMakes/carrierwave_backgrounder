@@ -117,8 +117,16 @@ module CarrierWave
             end
 
             def enqueue_#{column}_background_job
-              file_as_base64 = Base64.strict_encode64 #{column}.file.read
-              CarrierWave::Backgrounder.enqueue_for_backend(#{worker}, self.class.name, id.to_s, #{column}.mounted_as, #{column}.filename, file_as_base64, #{column}.file.content_type)
+              if #{column}.is_a? Array
+                file_as_base64 = #{column}.map { |c| Base64.strict_encode64(c.file.read) }
+                filename = #{column}.map { |c| c.filename }
+                content_type = #{column}.map { |c| c.file.content_type }
+              else
+                file_as_base64 = Base64.strict_encode64 #{column}.file.read
+                filename = #{column}.filename
+                content_type = #{column}.file.content_type
+              end
+              CarrierWave::Backgrounder.enqueue_for_backend(#{worker}, self.class.name, id.to_s, #{column}.mounted_as, filename, file_as_base64, content_type)
             end
           RUBY
         end
