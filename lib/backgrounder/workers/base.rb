@@ -3,7 +3,7 @@ module CarrierWave
   module Workers
 
     module Base
-      attr_accessor :klass, :id, :column, :record, :filename, :file_as_base64
+      attr_accessor :klass, :id, :column, :record, :filename, :file_as_base64, :content_type
 
       def initialize(*args)
         super(*args) unless self.class.superclass == Object
@@ -25,10 +25,11 @@ module CarrierWave
         end
       end
 
-      def set_args(klass, id, column, filename, file_as_base64)
+      def set_args(klass, id, column, filename, file_as_base64, content_type)
         self.klass, self.id, self.column = klass, id, column
         self.filename = filename
         self.file_as_base64 = file_as_base64
+        self.content_type = content_type
       end
 
       def constantized_resource
