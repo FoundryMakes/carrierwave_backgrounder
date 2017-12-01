@@ -18,7 +18,7 @@ module CarrierWave
           record.send :"process_#{column}_upload=", true
           record.send :"#{column}_processing=", false if record.respond_to?(:"#{column}_processing")
           if record.send(:"#{column}").is_a? Array
-            data_uris = self.file_as_base64.map do |c, i|
+            data_uris = self.file_as_base64.map.with_index do |c, i|
               "data:#{self.content_type[i]};filename=#{self.filename[i]};base64,#{c}"
             end
             record.send(:"#{column}_data_uri=", data_uris)
