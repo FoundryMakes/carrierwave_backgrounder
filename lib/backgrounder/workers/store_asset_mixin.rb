@@ -19,9 +19,7 @@ module CarrierWave
           record.send :"#{column}_processing=", false if record.respond_to?(:"#{column}_processing")
           record.send(:"#{column}_data_filename=", self.filename)
           record.send(:"#{column}_data_uri=", self.file_as_base64)
-          if record.save!
-            FileUtils.rm_r(tmp_directory, :force => true)
-          end
+          record.save!
         else
           when_not_ready
         end
