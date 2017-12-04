@@ -121,7 +121,7 @@ module CarrierWave
                 file_as_base64 = #{column}.map { |c| Base64.strict_encode64(c.file.read) }
                 filename = #{column}.map { |c| c.filename }
                 content_type = #{column}.map { |c| c.file.content_type }
-                mounted_as = #{column}[0].mounted_as
+                mounted_as = :#{column}
               else
                 file_as_base64 = Base64.strict_encode64 #{column}.file.read
                 filename = #{column}.filename
