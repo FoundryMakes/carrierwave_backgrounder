@@ -9,7 +9,7 @@ module CarrierWave
         base.extend CarrierWave::Workers::ClassMethods
       end
 
-      attr_reader :cache_path, :tmp_directory
+      attr_reader :cache_paths, :tmp_directories
 
       def perform(*args)
         record = super(*args)
@@ -19,9 +19,16 @@ module CarrierWave
           record.send :"process_#{column}_upload=", true
           record.send :"#{column}_tmp=", nil
           record.send :"#{column}_processing=", false if record.respond_to?(:"#{column}_processing")
-          File.open(cache_path) { |f| record.send :"#{column}=", f }
+          if record.respond_to?("#{column}_urls")
+            files = cache_paths.map do |cache_path|
+              File.open(cache_path)
+            end
+            record.send :"#{column}=", files
+          else
+            File.open(cache_paths[0]) { |f| record.send :"#{column}=", f }
+          end
           if record.save!
-            FileUtils.rm_r(tmp_directory, :force => true)
+            FileUtils.rm_r(tmp_directories, :force => true)
           end
         else
           when_not_ready
@@ -31,10 +38,11 @@ module CarrierWave
       private
 
       def store_directories(record)
-        asset, asset_tmp = record.send(:"#{column}"), record.send(:"#{column}_tmp")
-        cache_directory  = File.expand_path(asset.cache_dir, asset.root)
-        @cache_path      = File.join(cache_directory, asset_tmp)
-        @tmp_directory   = File.join(cache_directory, asset_tmp.split("/").first)
+        asset_tmp = record.send(:"#{column}_tmp")
+        uploader = record.class.uploaders[:"#{column}"]
+        cache_directory  = File.expand_path(uploader.cache_dir, uploader.root.call)
+        @cache_paths     = asset_tmp.map { |a| File.join(cache_directory, a) }
+        @tmp_directories = asset_tmp.map { |a| File.join(cache_directory, a.split("/").first) }
       end
 
     end # StoreAssetMixin

@@ -89,12 +89,12 @@ module CarrierWave
             def store_#{column}!
               super if process_#{column}_upload
             end
-            
+
             private
-            
+
             def cache_name_for_column(column)
               return _mounter(column).cache_name if _mounter(column).respond_to?(:cache_name)
-              _mounter(column).cache_names[0] if _mounter(column).respond_to?(:cache_names)
+              _mounter(column).cache_names if _mounter(column).respond_to?(:cache_names)
             end
 
           RUBY
@@ -117,7 +117,8 @@ module CarrierWave
             end
 
             def enqueue_#{column}_background_job
-              CarrierWave::Backgrounder.enqueue_for_backend(#{worker}, self.class.name, id.to_s, #{column}.mounted_as)
+              mounted_as = #{column}.is_a?(Array) ? :#{column} : #{column}.mounted_as
+              CarrierWave::Backgrounder.enqueue_for_backend(#{worker}, self.class.name, id.to_s, mounted_as)
             end
           RUBY
         end
